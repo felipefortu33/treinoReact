@@ -1,7 +1,7 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router, usePathname } from 'expo-router';
 import React from 'react';
 import { Animated, Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width: screenWidth } = Dimensions.get('window');

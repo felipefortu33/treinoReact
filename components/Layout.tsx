@@ -1,6 +1,6 @@
+import { Ionicons } from '@expo/vector-icons';
 import React, { useRef, useState } from 'react';
 import { Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Sidebar from './Sidebar';
 

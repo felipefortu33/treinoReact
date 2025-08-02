@@ -1,19 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Dimensions,
-  TextInput,
-  Modal,
-  Alert
-} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import {
+    Alert,
+    Dimensions,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
+} from 'react-native';
 import Layout from '../components/Layout';
-import { exercisesDatabase, categories, difficulties, checkUnlockConditions, calculateUserLevel } from '../data/exercisesDatabase';
+import { calculateUserLevel, categories, checkUnlockConditions, difficulties, exercisesDatabase } from '../data/exercisesDatabase';
 
 const { width } = Dimensions.get('window');
 
