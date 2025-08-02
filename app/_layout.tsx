@@ -38,6 +38,30 @@ export default function RootLayout() {
             headerShown: false,
           }} 
         />
+        <Stack.Screen 
+          name="exercise-list" 
+          options={{ 
+            headerShown: false,
+          }} 
+        />
+        <Stack.Screen 
+          name="exercise-challenge/[id]" 
+          options={{ 
+            headerShown: false,
+          }} 
+        />
+        <Stack.Screen 
+          name="leaderboard" 
+          options={{ 
+            headerShown: false,
+          }} 
+        />
+        <Stack.Screen 
+          name="profile" 
+          options={{ 
+            headerShown: false,
+          }} 
+        />
       </Stack>
       
       <StatusBar style="light" backgroundColor="#1A1B23" />

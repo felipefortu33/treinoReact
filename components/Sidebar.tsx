@@ -32,6 +32,15 @@ const menuItems = [
     badge: '23',
   },
   {
+    id: 'exercise-list',
+    title: 'Beecrowd Style',
+    icon: 'code-slash' as const,
+    route: '/exercise-list',
+    description: 'Exercícios avançados',
+    color: '#8B5CF6',
+    badge: 'PRO',
+  },
+  {
     id: 'challenges',
     title: 'Desafios',
     icon: 'trophy' as const,
@@ -48,6 +57,22 @@ const menuItems = [
     description: 'Acompanhe sua evolução',
     color: '#3B82F6',
     badge: '75%',
+  },
+  {
+    id: 'leaderboard',
+    title: 'Ranking',
+    icon: 'podium' as const,
+    route: '/leaderboard',
+    description: 'Competição global',
+    color: '#EF4444',
+  },
+  {
+    id: 'profile',
+    title: 'Perfil',
+    icon: 'person' as const,
+    route: '/profile',
+    description: 'Suas configurações',
+    color: '#6B7280',
   },
 ];
 
