@@ -1,10 +1,12 @@
 
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import React from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function RootLayout() {
   return (
-    <>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <Stack>
         <Stack.Screen 
           name="index" 
@@ -33,16 +35,12 @@ export default function RootLayout() {
         <Stack.Screen 
           name="exercise/[id]" 
           options={{ 
-            title: 'Exercício',
-            headerStyle: {
-              backgroundColor: '#3B82F6',
-            },
-            headerTintColor: '#fff',
+            headerShown: false,
           }} 
         />
       </Stack>
       
-      <StatusBar style="light" />
-    </>
+      <StatusBar style="light" backgroundColor="#1A1B23" />
+    </GestureHandlerRootView>
   );
 }

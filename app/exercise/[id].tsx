@@ -1,15 +1,16 @@
-import { useLocalSearchParams } from 'expo-router';
-import React, { useState } from 'react';
+import { useLocalSearchParams, router } from 'expo-router';
+import React, { useState, useEffect } from 'react';
 import {
   Dimensions,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
+  Animated,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import Layout from '../../components/Layout';
 
 const { width } = Dimensions.get('window');
 
@@ -22,6 +23,9 @@ const exercises = {
     correct: 'column',
     explanation: 'flex-direction: column organiza os elementos verticalmente de cima para baixo.',
     type: 'quiz',
+    difficulty: 'Básico',
+    points: 10,
+    hint: 'Pense em como você quer que os elementos fiquem dispostos: horizontal ou vertical?'
   },
   '2': {
     title: 'Justify Content',
@@ -31,6 +35,9 @@ const exercises = {
     correct: 'center',
     explanation: 'justify-content: center centraliza os elementos no eixo principal.',
     type: 'quiz',
+    difficulty: 'Básico',
+    points: 10,
+    hint: 'Para centralizar no eixo principal, qual propriedade você usaria?'
   },
   '3': {
     title: 'Align Items',
@@ -40,6 +47,9 @@ const exercises = {
     correct: 'center',
     explanation: 'align-items: center centraliza os elementos no eixo perpendicular.',
     type: 'quiz',
+    difficulty: 'Básico',
+    points: 10,
+    hint: 'O eixo perpendicular é o contrário do eixo principal.'
   },
   '4': {
     title: 'Flex Wrap',
@@ -49,1128 +59,651 @@ const exercises = {
     correct: 'wrap',
     explanation: 'flex-wrap: wrap permite que os elementos quebrem para a próxima linha.',
     type: 'quiz',
+    difficulty: 'Intermediário',
+    points: 15,
+    hint: 'Quando elementos não cabem em uma linha, o que deveria acontecer?'
   },
-  '5': {
-    title: 'Align Content',
-    description: 'Alinhe as linhas no container quando há quebra de linha.',
-    objective: 'Centralize as linhas no container',
-    options: ['flex-start', 'center', 'flex-end', 'space-between', 'space-around', 'stretch'],
-    correct: 'center',
-    explanation: 'align-content: center centraliza as linhas no container.',
-    type: 'quiz',
-  },
-  '6': {
-    title: 'Flex Grow & Shrink',
-    description: 'Controle como os elementos crescem e encolhem.',
-    objective: 'Faça o elemento do meio ocupar o espaço restante',
-    options: ['flex: 0', 'flex: 1', 'flex: 2', 'flex: auto'],
-    correct: 'flex: 1',
-    explanation: 'flex: 1 faz o elemento crescer para ocupar o espaço disponível.',
-    type: 'quiz',
-  },
-  // Exercícios de Codificação
-  '7': {
-    title: 'Navbar Horizontal',
-    description: 'Crie uma navbar com links alinhados horizontalmente',
-    objective: 'Implemente uma navbar onde os links ficam alinhados horizontalmente com espaçamento igual entre eles.',
-    type: 'code',
-    template: `const navbar = {
-  // Adicione as propriedades CSS aqui
-  display: '',
-  
-};`,
-    solution: `const navbar = {
-  display: 'flex',
-  justifyContent: 'space-around',
-  alignItems: 'center',
-  padding: '10px',
-};`,
-    hints: ['Use display: flex', 'justifyContent para espaçamento', 'alignItems para alinhamento vertical'],
-  },
-  '8': {
-    title: 'Layout de Cards',
-    description: 'Crie um grid responsivo de cards usando flex',
-    objective: 'Organize os cards em linhas que se ajustam automaticamente.',
-    type: 'code',
-    template: `const cardContainer = {
-  // Complete o CSS
-  display: '',
-  
-};`,
-    solution: `const cardContainer = {
-  display: 'flex',
-  flexWrap: 'wrap',
-  gap: '20px',
-  justifyContent: 'space-between',
-};`,
-    hints: ['Use flex-wrap para quebra de linha', 'gap para espaçamento', 'justify-content para distribuição'],
-  },
-  '9': {
-    title: 'Sidebar Layout',
-    description: 'Desenvolva um layout com sidebar e conteúdo principal',
-    objective: 'Crie um layout com sidebar fixa à esquerda e conteúdo principal flexível.',
-    type: 'code',
-    template: `const layoutContainer = {
-  // Complete o layout
-  display: '',
-  
-};`,
-    solution: `const layoutContainer = {
-  display: 'flex',
-  flexDirection: 'row',
-  height: '100vh',
 };
 
-const sidebar = {
-  width: '250px',
-  backgroundColor: '#f5f5f5',
-  flex: '0 0 auto',
-};
-
-const mainContent = {
-  flex: 1,
-  padding: '20px',
-  overflow: 'auto',
-};`,
-    hints: ['Use flex-direction: row', 'Sidebar com largura fixa', 'Main content com flex: 1'],
-  },
-  '10': {
-    title: 'Holy Grail Layout',
-    description: 'Implemente o famoso layout Holy Grail com Flexbox',
-    objective: 'Crie layout com header, footer, sidebar e main content.',
-    type: 'code',
-    template: `const holyGrailContainer = {
-  // Complete o layout
-  display: '',
-  
-};`,
-    solution: `const holyGrailContainer = {
-  display: 'flex',
-  flexDirection: 'column',
-  minHeight: '100vh',
-};
-
-const header = {
-  backgroundColor: '#333',
-  color: 'white',
-  padding: '1rem',
-};
-
-const main = {
-  display: 'flex',
-  flex: 1,
-};
-
-const sidebar = {
-  width: '200px',
-  backgroundColor: '#f0f0f0',
-};
-
-const content = {
-  flex: 1,
-  padding: '1rem',
-};
-
-const footer = {
-  backgroundColor: '#333',
-  color: 'white',
-  padding: '1rem',
-};`,
-    hints: ['Container principal com flex-direction: column', 'Main section com flex: 1', 'Sidebar com largura fixa'],
-  },
-  '11': {
-    title: 'Centro Perfeito',
-    description: 'Centralize um elemento vertical e horizontalmente',
-    objective: 'Faça o elemento ficar perfeitamente centralizado no container.',
-    type: 'code',
-    template: `const centerContainer = {
-  // Complete para centralizar
-  display: '',
-  height: '100vh',
-  
-};`,
-    solution: `const centerContainer = {
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  height: '100vh',
-};`,
-    hints: ['justify-content para centro horizontal', 'align-items para centro vertical', 'height para ocupar a tela'],
-  },
-  '12': {
-    title: 'Modal Dialog',
-    description: 'Crie um modal centralizado com overlay',
-    objective: 'Desenvolva um modal que fica perfeitamente centrado na tela.',
-    type: 'code',
-    template: `const modalOverlay = {
-  // Complete o modal
-  display: '',
-  
-};`,
-    solution: `const modalOverlay = {
-  position: 'fixed',
-  top: 0,
-  left: 0,
-  width: '100%',
-  height: '100%',
-  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-};
-
-const modalContent = {
-  backgroundColor: 'white',
-  padding: '2rem',
-  borderRadius: '8px',
-  maxWidth: '500px',
-  width: '90%',
-};`,
-    hints: ['position: fixed para overlay', 'Flex para centralizar', 'rgba para fundo semitransparente'],
-  },
-  '13': {
-    title: 'Responsive Navigation',
-    description: 'Navegação que se adapta a diferentes tamanhos de tela',
-    objective: 'Crie uma navegação responsiva que funciona em mobile e desktop.',
-    type: 'code',
-    template: `const navigation = {
-  // Complete a navegação responsiva
-  display: '',
-  
-};`,
-    solution: `const navigation = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  padding: '1rem',
-  backgroundColor: '#333',
-};
-
-const navLinks = {
-  display: 'flex',
-  listStyle: 'none',
-  margin: 0,
-  padding: 0,
-  gap: '1rem',
-};
-
-const navLinksMobile = {
-  display: 'flex',
-  flexDirection: 'column',
-  position: 'absolute',
-  top: '100%',
-  left: 0,
-  width: '100%',
-  backgroundColor: '#333',
-};`,
-    hints: ['Flex horizontal para desktop', 'Flex vertical para mobile', 'Media queries para responsividade'],
-  },
-  '14': {
-    title: 'Card Grid System',
-    description: 'Sistema de grid de cards responsivo',
-    objective: 'Crie um grid que se adapta automaticamente ao tamanho da tela.',
-    type: 'code',
-    template: `const cardGrid = {
-  // Complete o grid responsivo
-  display: '',
-  
-};`,
-    solution: `const cardGrid = {
-  display: 'flex',
-  flexWrap: 'wrap',
-  gap: '1rem',
-  padding: '1rem',
-};
-
-const card = {
-  flex: '1 1 300px',
-  backgroundColor: 'white',
-  borderRadius: '8px',
-  padding: '1rem',
-  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-  minWidth: '250px',
-  maxWidth: '350px',
-};`,
-    hints: ['flex-wrap: wrap para quebra', 'flex: 1 1 300px para responsividade', 'gap para espaçamento uniforme'],
-  },
-  '15': {
-    title: 'Sticky Footer',
-    description: 'Footer que gruda no final da página',
-    objective: 'Implemente um footer que sempre fica no final, mesmo com pouco conteúdo.',
-    type: 'code',
-    template: `const pageContainer = {
-  // Complete o sticky footer
-  display: '',
-  
-};`,
-    solution: `const pageContainer = {
-  display: 'flex',
-  flexDirection: 'column',
-  minHeight: '100vh',
-};
-
-const header = {
-  backgroundColor: '#333',
-  color: 'white',
-  padding: '1rem',
-};
-
-const main = {
-  flex: 1,
-  padding: '1rem',
-};
-
-const footer = {
-  backgroundColor: '#333',
-  color: 'white',
-  padding: '1rem',
-  marginTop: 'auto',
-};`,
-    hints: ['min-height: 100vh no container', 'flex: 1 no main content', 'margin-top: auto no footer'],
-  },
-  '16': {
-    title: 'Form Layout',
-    description: 'Crie um formulário bem estruturado com Flexbox',
-    objective: 'Organize os campos do formulário em uma coluna com espaçamento adequado.',
-    type: 'code',
-    template: `const formContainer = {
-  // Organize o formulário
-  display: '',
-  
-};`,
-    solution: `const formContainer = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '1rem',
-  maxWidth: '400px',
-  margin: '0 auto',
-  padding: '2rem',
-};
-
-const formGroup = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '0.5rem',
-};
-
-const formButton = {
-  alignSelf: 'flex-start',
-  padding: '0.75rem 1.5rem',
-  backgroundColor: '#007bff',
-  color: 'white',
-  border: 'none',
-  borderRadius: '4px',
-};`,
-    hints: ['flex-direction: column para organizar verticalmente', 'gap para espaçamento', 'max-width para limitar largura'],
-  },
-  '17': {
-    title: 'Image Gallery',
-    description: 'Galeria de imagens responsiva',
-    objective: 'Crie uma galeria que organiza imagens automaticamente.',
-    type: 'code',
-    template: `const gallery = {
-  // Complete a galeria
-  display: '',
-  
-};`,
-    solution: `const gallery = {
-  display: 'flex',
-  flexWrap: 'wrap',
-  gap: '1rem',
-  padding: '1rem',
-};
-
-const imageItem = {
-  flex: '1 1 200px',
-  maxWidth: '300px',
-  height: '200px',
-  overflow: 'hidden',
-  borderRadius: '8px',
-};
-
-const image = {
-  width: '100%',
-  height: '100%',
-  objectFit: 'cover',
-};`,
-    hints: ['flex-wrap para múltiplas linhas', 'flex: 1 1 200px para responsividade', 'object-fit: cover para imagens'],
-  },
-  '18': {
-    title: 'Dashboard Layout',
-    description: 'Layout de dashboard com múltiplas seções',
-    objective: 'Crie um dashboard com header, sidebar e área de conteúdo.',
-    type: 'code',
-    template: `const dashboard = {
-  // Complete o dashboard
-  display: '',
-  
-};`,
-    solution: `const dashboard = {
-  display: 'flex',
-  flexDirection: 'column',
-  height: '100vh',
-};
-
-const dashboardHeader = {
-  backgroundColor: '#2563eb',
-  color: 'white',
-  padding: '1rem',
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-};
-
-const dashboardBody = {
-  display: 'flex',
-  flex: 1,
-  overflow: 'hidden',
-};
-
-const sidebar = {
-  width: '250px',
-  backgroundColor: '#f8fafc',
-  borderRight: '1px solid #e2e8f0',
-  overflow: 'auto',
-};
-
-const mainContent = {
-  flex: 1,
-  padding: '1rem',
-  overflow: 'auto',
-};`,
-    hints: ['Layout vertical para estrutura principal', 'Layout horizontal para body', 'overflow: auto para scroll'],
-  },
-  '19': {
-    title: 'Pricing Cards',
-    description: 'Cards de preços com alinhamento perfeito',
-    objective: 'Crie cards de preços que ficam alinhados independente do conteúdo.',
-    type: 'code',
-    template: `const pricingContainer = {
-  // Complete os cards de preço
-  display: '',
-  
-};`,
-    solution: `const pricingContainer = {
-  display: 'flex',
-  gap: '2rem',
-  padding: '2rem',
-  justifyContent: 'center',
-  flexWrap: 'wrap',
-};
-
-const pricingCard = {
-  display: 'flex',
-  flexDirection: 'column',
-  width: '300px',
-  padding: '2rem',
-  border: '1px solid #e2e8f0',
-  borderRadius: '8px',
-  backgroundColor: 'white',
-};
-
-const cardHeader = {
-  textAlign: 'center',
-  marginBottom: '1rem',
-};
-
-const cardFeatures = {
-  flex: 1,
-  marginBottom: '2rem',
-};
-
-const cardButton = {
-  marginTop: 'auto',
-  padding: '0.75rem',
-  backgroundColor: '#2563eb',
-  color: 'white',
-  textAlign: 'center',
-  borderRadius: '4px',
-};`,
-    hints: ['flex-direction: column nos cards', 'flex: 1 na seção de features', 'margin-top: auto no botão'],
-  },
-  '20': {
-    title: 'Timeline Layout',
-    description: 'Timeline vertical com indicadores',
-    objective: 'Crie uma timeline vertical com pontos e linhas conectoras.',
-    type: 'code',
-    template: `const timeline = {
-  // Complete a timeline
-  display: '',
-  
-};`,
-    solution: `const timeline = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '2rem',
-  padding: '2rem',
-  maxWidth: '600px',
-  margin: '0 auto',
-};
-
-const timelineItem = {
-  display: 'flex',
-  gap: '1rem',
-  position: 'relative',
-};
-
-const timelineMarker = {
-  width: '20px',
-  height: '20px',
-  borderRadius: '50%',
-  backgroundColor: '#2563eb',
-  flexShrink: 0,
-  marginTop: '0.25rem',
-};
-
-const timelineContent = {
-  flex: 1,
-  padding: '1rem',
-  backgroundColor: '#f8fafc',
-  borderRadius: '8px',
-  border: '1px solid #e2e8f0',
-};`,
-    hints: ['flex-direction: column para itens verticais', 'position: relative para linhas conectoras', 'flex-shrink: 0 no marker'],
-  },
-  // 🚀 EXERCÍCIOS REACT NATIVE/EXPO
-  '27': {
-    title: 'Animated Tabs',
-    description: 'Crie tabs com animações usando Animated API do React Native',
-    objective: 'Implemente tabs que deslizam suavemente com indicador animado.',
-    type: 'react-native',
-    template: `import { Animated, View, TouchableOpacity } from 'react-native';
-
-const TabBar = () => {
-  const [activeTab, setActiveTab] = useState(0);
-  const animatedValue = new Animated.Value(0);
-  
-  const animateTab = (index) => {
-    // Complete a animação aqui
-    
-  };
-  
-  return (
-    <View style={styles.container}>
-      {/* Seu código aqui */}
-    </View>
-  );
-};`,
-    solution: `import { Animated, View, TouchableOpacity, Text } from 'react-native';
-
-const TabBar = () => {
-  const [activeTab, setActiveTab] = useState(0);
-  const animatedValue = new Animated.Value(0);
-  
-  const animateTab = (index) => {
-    setActiveTab(index);
-    Animated.spring(animatedValue, {
-      toValue: index,
-      useNativeDriver: false,
-      tension: 100,
-      friction: 8,
-    }).start();
-  };
-  
-  return (
-    <View style={styles.container}>
-      <Animated.View 
-        style={[
-          styles.indicator,
-          {
-            left: animatedValue.interpolate({
-              inputRange: [0, 1, 2],
-              outputRange: ['0%', '33.33%', '66.66%'],
-            }),
-          }
-        ]} 
-      />
-      {tabs.map((tab, index) => (
-        <TouchableOpacity 
-          key={index}
-          onPress={() => animateTab(index)}
-        >
-          <Text>{tab}</Text>
-        </TouchableOpacity>
-      ))}
-    </View>
-  );
-};`,
-    hints: ['Use Animated.Value para controlar posição', 'Animated.spring para suavidade', 'interpolate para calcular posições'],
-  },
-  '28': {
-    title: 'Pull to Refresh',
-    description: 'Implemente pull-to-refresh em ScrollView',
-    objective: 'Adicione funcionalidade de puxar para atualizar.',
-    type: 'react-native',
-    template: `import { ScrollView, RefreshControl } from 'react-native';
-
-const PullToRefreshList = () => {
-  const [refreshing, setRefreshing] = useState(false);
-  
-  const onRefresh = () => {
-    // Complete a função de refresh
-    
-  };
-  
-  return (
-    <ScrollView
-      refreshControl={
-        // Adicione o RefreshControl aqui
-      }
-    >
-      {/* Conteúdo da lista */}
-    </ScrollView>
-  );
-};`,
-    solution: `import { ScrollView, RefreshControl } from 'react-native';
-
-const PullToRefreshList = () => {
-  const [refreshing, setRefreshing] = useState(false);
-  
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 2000);
-  }, []);
-  
-  return (
-    <ScrollView
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          colors={['#10B981']}
-          tintColor="#10B981"
-        />
-      }
-    >
-      {data.map(item => (
-        <Text key={item.id}>{item.title}</Text>
-      ))}
-    </ScrollView>
-  );
-};`,
-    hints: ['Use RefreshControl component', 'useState para gerenciar estado refreshing', 'useCallback para otimizar performance'],
-  },
-  '32': {
-    title: 'Camera Integration',
-    description: 'Interface de câmera com Expo Camera',
-    objective: 'Crie uma tela de câmera com controles de captura.',
-    type: 'expo',
-    template: `import { Camera } from 'expo-camera';
-import { useState, useRef } from 'react';
-
-const CameraScreen = () => {
-  const [hasPermission, setHasPermission] = useState(null);
-  const cameraRef = useRef(null);
-  
-  // Implemente as funções de câmera
-  
-  return (
-    <Camera style={{ flex: 1 }} ref={cameraRef}>
-      {/* Adicione controles aqui */}
-    </Camera>
-  );
-};`,
-    solution: `import { Camera } from 'expo-camera';
-import { useState, useRef, useEffect } from 'react';
-import { View, TouchableOpacity, Text } from 'react-native';
-
-const CameraScreen = () => {
-  const [hasPermission, setHasPermission] = useState(null);
-  const [type, setType] = useState(Camera.Constants.Type.back);
-  const cameraRef = useRef(null);
-  
-  useEffect(() => {
-    (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === 'granted');
-    })();
-  }, []);
-  
-  const takePicture = async () => {
-    if (cameraRef.current) {
-      const photo = await cameraRef.current.takePictureAsync();
-      console.log(photo);
+const FlexContainer = ({ 
+  flexDirection, 
+  justifyContent, 
+  alignItems, 
+  flexWrap 
+}: {
+  flexDirection?: string;
+  justifyContent?: string;
+  alignItems?: string;
+  flexWrap?: string;
+}) => (
+  <View style={[
+    styles.flexContainer,
+    {
+      flexDirection: flexDirection as any || 'row',
+      justifyContent: justifyContent as any || 'flex-start',
+      alignItems: alignItems as any || 'flex-start',
+      flexWrap: flexWrap as any || 'nowrap',
     }
-  };
-  
-  return (
-    <Camera style={{ flex: 1 }} type={type} ref={cameraRef}>
-      <View style={{ flex: 1, justifyContent: 'flex-end', alignItems: 'center' }}>
-        <TouchableOpacity onPress={takePicture}>
-          <Text>Capturar</Text>
-        </TouchableOpacity>
-      </View>
-    </Camera>
-  );
-};`,
-    hints: ['Solicite permissão da câmera', 'Use useRef para referenciar camera', 'takePictureAsync para capturar'],
-  },
-};
-
-const DemoBox = ({ style, text }: { style?: any; text?: string }) => (
-  <View style={[styles.demoBox, style]}>
-    <Text style={styles.demoBoxText}>{text || '📦'}</Text>
+  ]}>
+    <View style={[styles.flexItem, { backgroundColor: '#3B82F6' }]}>
+      <Text style={styles.flexItemText}>1</Text>
+    </View>
+    <View style={[styles.flexItem, { backgroundColor: '#10B981' }]}>
+      <Text style={styles.flexItemText}>2</Text>
+    </View>
+    <View style={[styles.flexItem, { backgroundColor: '#F59E0B' }]}>
+      <Text style={styles.flexItemText}>3</Text>
+    </View>
   </View>
 );
 
+const OptionButton = ({ 
+  option, 
+  isSelected, 
+  isCorrect, 
+  isWrong, 
+  onPress, 
+  disabled 
+}: {
+  option: string;
+  isSelected: boolean;
+  isCorrect: boolean;
+  isWrong: boolean;
+  onPress: () => void;
+  disabled: boolean;
+}) => {
+  let backgroundColor = '#1A1B23';
+  let borderColor = '#2D2E36';
+  let textColor = '#FFFFFF';
+
+  if (isSelected && !disabled) {
+    backgroundColor = '#6366F1';
+    borderColor = '#6366F1';
+  } else if (isCorrect && disabled) {
+    backgroundColor = '#10B981';
+    borderColor = '#10B981';
+  } else if (isWrong && disabled) {
+    backgroundColor = '#EF4444';
+    borderColor = '#EF4444';
+  }
+
+  return (
+    <TouchableOpacity
+      style={[
+        styles.optionButton,
+        { backgroundColor, borderColor }
+      ]}
+      onPress={onPress}
+      disabled={disabled}
+    >
+      <Text style={[styles.optionText, { color: textColor }]}>
+        {option}
+      </Text>
+      {isCorrect && disabled && (
+        <Ionicons name="checkmark" size={20} color="#FFFFFF" />
+      )}
+      {isWrong && disabled && (
+        <Ionicons name="close" size={20} color="#FFFFFF" />
+      )}
+    </TouchableOpacity>
+  );
+};
+
 export default function ExercisePage() {
   const { id } = useLocalSearchParams();
-  const exercise = exercises[id as keyof typeof exercises];
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [showResult, setShowResult] = useState(false);
-  const [userCode, setUserCode] = useState('');
-  const [showHints, setShowHints] = useState(false);
+  const [showHint, setShowHint] = useState(false);
+  const [attempts, setAttempts] = useState(0);
+  const [fadeAnim] = useState(new Animated.Value(0));
+
+  const exercise = exercises[id as keyof typeof exercises];
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
+  }, []);
 
   if (!exercise) {
     return (
-      <SafeAreaView style={styles.container}>
+      <Layout title="Exercício não encontrado">
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Exercício não encontrado</Text>
+          <Ionicons name="warning" size={48} color="#F59E0B" />
+          <Text style={styles.errorTitle}>Exercício não encontrado</Text>
+          <Text style={styles.errorDescription}>
+            O exercício que você está procurando não existe.
+          </Text>
+          <TouchableOpacity 
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Text style={styles.backButtonText}>Voltar</Text>
+          </TouchableOpacity>
         </View>
-      </SafeAreaView>
+      </Layout>
     );
   }
 
-  const isCodeExercise = exercise.type === 'code';
-  const isQuizExercise = !isCodeExercise;
-
   const handleOptionSelect = (option: string) => {
+    if (showResult) return;
+    
     setSelectedOption(option);
+    setAttempts(prev => prev + 1);
     setShowResult(true);
   };
 
-  const handleCodeSubmit = () => {
-    setShowResult(true);
+  const isCorrect = selectedOption === exercise.correct;
+  const getScore = () => {
+    if (!isCorrect) return 0;
+    if (attempts === 1) return exercise.points;
+    if (attempts === 2) return Math.floor(exercise.points * 0.7);
+    return Math.floor(exercise.points * 0.5);
   };
 
-  const resetExercise = () => {
+  const handleContinue = () => {
+    const nextId = parseInt(id as string) + 1;
+    if (exercises[nextId.toString() as keyof typeof exercises]) {
+      router.push(`/exercise/${nextId}`);
+    } else {
+      router.push('/exercises');
+    }
+  };
+
+  const handleTryAgain = () => {
     setSelectedOption(null);
     setShowResult(false);
-    setUserCode('');
-    setShowHints(false);
   };
 
-  const initializeCodeTemplate = () => {
-    if (isCodeExercise && userCode === '' && 'template' in exercise) {
-      setUserCode(exercise.template);
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'Básico': return '#10B981';
+      case 'Intermediário': return '#F59E0B';
+      case 'Avançado': return '#EF4444';
+      default: return '#6B7280';
     }
   };
-
-  React.useEffect(() => {
-    initializeCodeTemplate();
-  }, []);
-
-  const getDemoStyle = () => {
-    if (!selectedOption || isCodeExercise) return {};
-
-    const baseStyle = {
-      flexDirection: 'row' as any,
-      justifyContent: 'flex-start' as any,
-      alignItems: 'flex-start' as any,
-      flexWrap: 'nowrap' as any,
-      alignContent: 'flex-start' as any,
-    };
-
-    switch (exercise.title) {
-      case 'Flex Direction':
-        return { ...baseStyle, flexDirection: selectedOption as any };
-      case 'Justify Content':
-        return { ...baseStyle, justifyContent: selectedOption as any };
-      case 'Align Items':
-        return { ...baseStyle, alignItems: selectedOption as any };
-      case 'Flex Wrap':
-        return { ...baseStyle, flexWrap: selectedOption as any };
-      case 'Align Content':
-        return { ...baseStyle, flexWrap: 'wrap', alignContent: selectedOption as any };
-      default:
-        return baseStyle;
-    }
-  };
-
-  const isCorrect = isQuizExercise && 'correct' in exercise 
-    ? selectedOption === exercise.correct 
-    : false;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>{exercise.title}</Text>
-          <Text style={styles.description}>{exercise.description}</Text>
-        </View>
+    <Layout 
+      title={exercise.title}
+      showBackButton
+      onBackPress={() => router.back()}
+      headerRight={
+        <TouchableOpacity onPress={() => setShowHint(!showHint)}>
+          <Ionicons name="help-circle" size={24} color="#6366F1" />
+        </TouchableOpacity>
+      }
+    >
+      <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {/* Exercise Header */}
+          <View style={styles.header}>
+            <View style={styles.headerTop}>
+              <View style={[
+                styles.difficultyBadge, 
+                { backgroundColor: getDifficultyColor(exercise.difficulty) }
+              ]}>
+                <Text style={styles.difficultyText}>{exercise.difficulty}</Text>
+              </View>
+              <View style={styles.pointsBadge}>
+                <Ionicons name="star" size={14} color="#F59E0B" />
+                <Text style={styles.pointsText}>{exercise.points} pts</Text>
+              </View>
+            </View>
+            
+            <Text style={styles.exerciseTitle}>{exercise.title}</Text>
+            <Text style={styles.exerciseDescription}>{exercise.description}</Text>
+          </View>
 
-        {/* Objetivo */}
-        <View style={styles.objectiveContainer}>
-          <Text style={styles.objectiveTitle}>🎯 Objetivo:</Text>
-          <Text style={styles.objective}>{exercise.objective}</Text>
-        </View>
+          {/* Hint */}
+          {showHint && (
+            <View style={styles.hintContainer}>
+              <View style={styles.hintHeader}>
+                <Ionicons name="bulb" size={16} color="#F59E0B" />
+                <Text style={styles.hintTitle}>Dica</Text>
+              </View>
+              <Text style={styles.hintText}>{exercise.hint}</Text>
+            </View>
+          )}
 
-        {/* Demo Container - apenas para exercícios de quiz */}
-        {isQuizExercise && (
+          {/* Objective */}
+          <View style={styles.objectiveContainer}>
+            <Text style={styles.objectiveTitle}>🎯 Objetivo</Text>
+            <Text style={styles.objectiveText}>{exercise.objective}</Text>
+          </View>
+
+          {/* Visual Demo */}
           <View style={styles.demoContainer}>
-            <Text style={styles.demoTitle}>Visualização:</Text>
-            <View style={[styles.demoArea, getDemoStyle()]}>
-              {exercise.title === 'Flex Grow & Shrink' ? (
-                <>
-                  <DemoBox text="A" />
-                  <DemoBox 
-                    style={selectedOption === 'flex: 1' ? { flex: 1 } : {}} 
-                    text="B" 
-                  />
-                  <DemoBox text="C" />
-                </>
-              ) : (
-                <>
-                  <DemoBox text="1" />
-                  <DemoBox text="2" />
-                  <DemoBox text="3" />
-                  {exercise.title === 'Flex Wrap' && (
-                    <>
-                      <DemoBox text="4" />
-                      <DemoBox text="5" />
-                      <DemoBox text="6" />
-                    </>
-                  )}
-                </>
-              )}
+            <Text style={styles.demoTitle}>Resultado Esperado</Text>
+            <View style={styles.demoWrapper}>
+              <FlexContainer 
+                flexDirection={exercise.title.includes('Direction') ? exercise.correct : 'row'}
+                justifyContent={exercise.title.includes('Justify') ? exercise.correct : 'flex-start'}
+                alignItems={exercise.title.includes('Align Items') ? exercise.correct : 'flex-start'}
+                flexWrap={exercise.title.includes('Wrap') ? exercise.correct : 'nowrap'}
+              />
             </View>
           </View>
-        )}
 
-        {/* Code Editor - para exercícios de código */}
-        {isCodeExercise && 'template' in exercise && (
-          <View style={styles.codeContainer}>
-            <Text style={styles.codeTitle}>💻 Editor de Código:</Text>
-            <TextInput
-              style={styles.codeEditor}
-              value={userCode}
-              onChangeText={setUserCode}
-              multiline
-              placeholder="Digite seu código aqui..."
-              placeholderTextColor="#9CA3AF"
-            />
-            
-            {/* Hints */}
-            <TouchableOpacity 
-              style={styles.hintsButton}
-              onPress={() => setShowHints(!showHints)}
-            >
-              <Text style={styles.hintsButtonText}>
-                {showHints ? '🙈 Ocultar Dicas' : '💡 Ver Dicas'}
-              </Text>
-            </TouchableOpacity>
-
-            {showHints && 'hints' in exercise && (
-              <View style={styles.hintsContainer}>
-                {exercise.hints.map((hint, index) => (
-                  <Text key={index} style={styles.hintText}>• {hint}</Text>
-                ))}
+          {/* Your Answer */}
+          {selectedOption && (
+            <View style={styles.answerContainer}>
+              <Text style={styles.answerTitle}>Sua Resposta</Text>
+              <View style={styles.demoWrapper}>
+                <FlexContainer 
+                  flexDirection={exercise.title.includes('Direction') ? selectedOption : 'row'}
+                  justifyContent={exercise.title.includes('Justify') ? selectedOption : 'flex-start'}
+                  alignItems={exercise.title.includes('Align Items') ? selectedOption : 'flex-start'}
+                  flexWrap={exercise.title.includes('Wrap') ? selectedOption : 'nowrap'}
+                />
               </View>
-            )}
+            </View>
+          )}
 
-            <TouchableOpacity style={styles.submitButton} onPress={handleCodeSubmit}>
-              <Text style={styles.submitButtonText}>🚀 Verificar Código</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {/* Quiz Options */}
-        {isQuizExercise && 'options' in exercise && (
+          {/* Options */}
           <View style={styles.optionsContainer}>
-            <Text style={styles.optionsTitle}>Escolha a propriedade correta:</Text>
-            {exercise.options.map((option: string) => (
-              <TouchableOpacity
-                key={option}
-                style={[
-                  styles.optionButton,
-                  selectedOption === option && styles.selectedOption,
-                  showResult && 'correct' in exercise && option === exercise.correct && styles.correctOption,
-                  showResult && selectedOption === option && 'correct' in exercise && option !== exercise.correct && styles.incorrectOption,
-                ]}
-                onPress={() => handleOptionSelect(option)}
-                disabled={showResult}
-              >
-                <Text style={[
-                  styles.optionText,
-                  selectedOption === option && styles.selectedOptionText,
-                  showResult && 'correct' in exercise && option === exercise.correct && styles.correctOptionText,
-                ]}>
-                  {option}
-                </Text>
-              </TouchableOpacity>
-            ))}
+            <Text style={styles.optionsTitle}>Escolha a opção correta:</Text>
+            <View style={styles.optionsList}>
+              {exercise.options.map((option) => (
+                <OptionButton
+                  key={option}
+                  option={option}
+                  isSelected={selectedOption === option}
+                  isCorrect={option === exercise.correct}
+                  isWrong={selectedOption === option && option !== exercise.correct}
+                  onPress={() => handleOptionSelect(option)}
+                  disabled={showResult}
+                />
+              ))}
+            </View>
           </View>
-        )}
 
-        {/* Result */}
-        {showResult && (
-          <View style={[styles.resultContainer, isCorrect ? styles.correctResult : styles.incorrectResult]}>
-            <Text style={styles.resultTitle}>
-              {isCodeExercise ? '🎉 Código Submetido!' : (isCorrect ? '✅ Correto!' : '❌ Incorreto')}
-            </Text>
-            
-            {isQuizExercise && 'explanation' in exercise && (
-              <Text style={styles.explanation}>{exercise.explanation}</Text>
-            )}
-            
-            {isCodeExercise && 'solution' in exercise && (
-              <View>
-                <Text style={styles.solutionTitle}>💡 Solução Esperada:</Text>
-                <View style={styles.solutionContainer}>
-                  <Text style={styles.solutionText}>{exercise.solution}</Text>
-                </View>
+          {/* Result */}
+          {showResult && (
+            <View style={[
+              styles.resultContainer,
+              { backgroundColor: isCorrect ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)' }
+            ]}>
+              <View style={styles.resultHeader}>
+                <Ionicons 
+                  name={isCorrect ? "checkmark-circle" : "close-circle"} 
+                  size={24} 
+                  color={isCorrect ? "#10B981" : "#EF4444"} 
+                />
+                <Text style={[
+                  styles.resultTitle,
+                  { color: isCorrect ? "#10B981" : "#EF4444" }
+                ]}>
+                  {isCorrect ? "Correto!" : "Incorreto"}
+                </Text>
+                {isCorrect && (
+                  <View style={styles.scoreContainer}>
+                    <Text style={styles.scoreText}>+{getScore()} XP</Text>
+                  </View>
+                )}
               </View>
-            )}
-            
-            <TouchableOpacity style={styles.resetButton} onPress={resetExercise}>
-              <Text style={styles.resetButtonText}>
-                {isCodeExercise ? 'Tentar Outro Código' : 'Tentar Novamente'}
-              </Text>
-            </TouchableOpacity>
+
+              <Text style={styles.resultExplanation}>{exercise.explanation}</Text>
+
+              <View style={styles.resultActions}>
+                {isCorrect ? (
+                  <TouchableOpacity 
+                    style={styles.continueButton}
+                    onPress={handleContinue}
+                  >
+                    <Text style={styles.continueButtonText}>Continuar</Text>
+                    <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
+                  </TouchableOpacity>
+                ) : (
+                  <View style={styles.actionButtons}>
+                    <TouchableOpacity 
+                      style={styles.tryAgainButton}
+                      onPress={handleTryAgain}
+                    >
+                      <Ionicons name="refresh" size={16} color="#FFFFFF" />
+                      <Text style={styles.tryAgainButtonText}>Tentar Novamente</Text>
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity 
+                      style={styles.skipButton}
+                      onPress={handleContinue}
+                    >
+                      <Text style={styles.skipButtonText}>Pular</Text>
+                      <Ionicons name="arrow-forward" size={16} color="#6366F1" />
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+            </View>
+          )}
+
+          {/* Progress Indicator */}
+          <View style={styles.progressContainer}>
+            <Text style={styles.progressText}>
+              Exercício {id} de {Object.keys(exercises).length}
+            </Text>
+            <View style={styles.progressBar}>
+              <View 
+                style={[
+                  styles.progressFill, 
+                  { width: `${(parseInt(id as string) / Object.keys(exercises).length) * 100}%` }
+                ]} 
+              />
+            </View>
           </View>
-        )}
-      </ScrollView>
-    </SafeAreaView>
+
+          <View style={styles.bottomSpacing} />
+        </ScrollView>
+      </Animated.View>
+    </Layout>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
-  },
-  scrollContent: {
-    padding: 20,
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 20,
+    gap: 16,
   },
-  errorText: {
-    fontSize: 18,
-    color: '#EF4444',
+  errorTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  errorDescription: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    textAlign: 'center',
+  },
+  backButton: {
+    backgroundColor: '#6366F1',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginTop: 16,
+  },
+  backButtonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
   },
   header: {
-    marginBottom: 20,
+    padding: 20,
+    marginBottom: 16,
   },
-  title: {
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  difficultyBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  difficultyText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  pointsBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    gap: 4,
+  },
+  pointsText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#F59E0B',
+  },
+  exerciseTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: '#FFFFFF',
     marginBottom: 8,
   },
-  description: {
+  exerciseDescription: {
     fontSize: 16,
-    color: '#6B7280',
+    color: '#9CA3AF',
     lineHeight: 22,
   },
-  objectiveContainer: {
-    backgroundColor: '#EFF6FF',
+  hintContainer: {
+    marginHorizontal: 20,
+    marginBottom: 20,
+    backgroundColor: 'rgba(245, 158, 11, 0.1)',
     borderRadius: 12,
     padding: 16,
-    marginBottom: 20,
     borderWidth: 1,
-    borderColor: '#DBEAFE',
+    borderColor: 'rgba(245, 158, 11, 0.2)',
+  },
+  hintHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    gap: 8,
+  },
+  hintTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#F59E0B',
+  },
+  hintText: {
+    fontSize: 14,
+    color: '#FFFFFF',
+    lineHeight: 20,
+  },
+  objectiveContainer: {
+    marginHorizontal: 20,
+    marginBottom: 24,
+    backgroundColor: '#1A1B23',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#2D2E36',
   },
   objectiveTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#3B82F6',
-    marginBottom: 4,
+    color: '#FFFFFF',
+    marginBottom: 8,
   },
-  objective: {
+  objectiveText: {
     fontSize: 14,
-    color: '#1E40AF',
+    color: '#9CA3AF',
+    lineHeight: 20,
   },
   demoContainer: {
-    marginBottom: 20,
+    marginHorizontal: 20,
+    marginBottom: 24,
   },
   demoTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: '#FFFFFF',
     marginBottom: 12,
   },
-  demoArea: {
-    backgroundColor: '#FFFFFF',
+  demoWrapper: {
+    backgroundColor: '#1A1B23',
     borderRadius: 12,
-    padding: 20,
-    minHeight: 120,
-    borderWidth: 2,
-    borderColor: '#E5E7EB',
-    borderStyle: 'dashed',
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#2D2E36',
   },
-  demoBox: {
-    width: 50,
-    height: 50,
-    backgroundColor: '#3B82F6',
+  flexContainer: {
+    height: 120,
+    backgroundColor: '#374151',
+    borderRadius: 8,
+    padding: 12,
+    gap: 8,
+  },
+  flexItem: {
+    width: 40,
+    height: 40,
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
-    margin: 4,
   },
-  demoBoxText: {
+  flexItemText: {
     color: '#FFFFFF',
     fontWeight: 'bold',
     fontSize: 16,
   },
+  answerContainer: {
+    marginHorizontal: 20,
+    marginBottom: 24,
+  },
+  answerTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 12,
+  },
   optionsContainer: {
-    marginBottom: 20,
+    marginHorizontal: 20,
+    marginBottom: 24,
   },
   optionsTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#1F2937',
-    marginBottom: 12,
+    color: '#FFFFFF',
+    marginBottom: 16,
+  },
+  optionsList: {
+    gap: 12,
   },
   optionButton: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     padding: 16,
-    marginBottom: 8,
-    borderWidth: 2,
-    borderColor: '#E5E7EB',
-  },
-  selectedOption: {
-    borderColor: '#3B82F6',
-    backgroundColor: '#EFF6FF',
-  },
-  correctOption: {
-    borderColor: '#10B981',
-    backgroundColor: '#ECFDF5',
-  },
-  incorrectOption: {
-    borderColor: '#EF4444',
-    backgroundColor: '#FEF2F2',
+    borderRadius: 12,
+    borderWidth: 1,
   },
   optionText: {
     fontSize: 16,
-    color: '#374151',
-    fontFamily: 'monospace',
-  },
-  selectedOptionText: {
-    color: '#1E40AF',
-    fontWeight: '600',
-  },
-  correctOptionText: {
-    color: '#065F46',
-    fontWeight: '600',
+    fontWeight: '500',
   },
   resultContainer: {
+    marginHorizontal: 20,
+    marginBottom: 24,
     borderRadius: 12,
-    padding: 16,
+    padding: 20,
     borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.2)',
   },
-  correctResult: {
-    backgroundColor: '#ECFDF5',
-    borderColor: '#10B981',
-  },
-  incorrectResult: {
-    backgroundColor: '#FEF2F2',
-    borderColor: '#EF4444',
+  resultHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    gap: 12,
   },
   resultTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 8,
+    flex: 1,
   },
-  explanation: {
+  scoreContainer: {
+    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  scoreText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#10B981',
+  },
+  resultExplanation: {
     fontSize: 14,
-    color: '#374151',
-    marginBottom: 16,
-    lineHeight: 20,
-  },
-  resetButton: {
-    backgroundColor: '#6B7280',
-    borderRadius: 8,
-    padding: 12,
-    alignItems: 'center',
-  },
-  resetButtonText: {
     color: '#FFFFFF',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  // Estilos para exercícios de código
-  codeContainer: {
+    lineHeight: 20,
     marginBottom: 20,
   },
-  codeTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1F2937',
-    marginBottom: 12,
+  resultActions: {
+    gap: 12,
   },
-  codeEditor: {
-    backgroundColor: '#1F2937',
-    color: '#F9FAFB',
-    borderRadius: 8,
-    padding: 16,
-    fontSize: 14,
-    fontFamily: 'monospace',
-    minHeight: 120,
-    textAlignVertical: 'top',
-    borderWidth: 1,
-    borderColor: '#374151',
-  },
-  hintsButton: {
-    backgroundColor: '#F59E0B',
-    borderRadius: 8,
-    padding: 10,
-    marginTop: 10,
+  continueButton: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
-  },
-  hintsButtonText: {
-    color: '#FFFFFF',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  hintsContainer: {
-    backgroundColor: '#FFFBEB',
-    borderRadius: 8,
-    padding: 12,
-    marginTop: 10,
-    borderWidth: 1,
-    borderColor: '#FDE68A',
-  },
-  hintText: {
-    fontSize: 14,
-    color: '#92400E',
-    marginBottom: 4,
-  },
-  submitButton: {
     backgroundColor: '#10B981',
+    paddingVertical: 12,
     borderRadius: 8,
-    padding: 16,
-    marginTop: 16,
-    alignItems: 'center',
+    gap: 8,
   },
-  submitButtonText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
+  continueButtonText: {
     fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
   },
-  solutionTitle: {
+  actionButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  tryAgainButton: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#6366F1',
+    paddingVertical: 12,
+    borderRadius: 8,
+    gap: 8,
+  },
+  tryAgainButtonText: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#374151',
+    color: '#FFFFFF',
+  },
+  skipButton: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#6366F1',
+    paddingVertical: 12,
+    borderRadius: 8,
+    gap: 8,
+  },
+  skipButtonText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#6366F1',
+  },
+  progressContainer: {
+    marginHorizontal: 20,
+    marginBottom: 24,
+  },
+  progressText: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    textAlign: 'center',
     marginBottom: 8,
   },
-  solutionContainer: {
-    backgroundColor: '#F3F4F6',
-    borderRadius: 8,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    marginBottom: 16,
+  progressBar: {
+    height: 4,
+    backgroundColor: '#374151',
+    borderRadius: 2,
   },
-  solutionText: {
-    fontSize: 12,
-    color: '#1F2937',
-    fontFamily: 'monospace',
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#6366F1',
+    borderRadius: 2,
+  },
+  bottomSpacing: {
+    height: 32,
   },
 });
